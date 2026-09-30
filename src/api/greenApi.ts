@@ -48,10 +48,15 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   })
   if (!res.ok) {
     const text = await res.text().catch(() => '')
+    const details = text && !text.trimStart().startsWith('<') && text.length < 300 ? `: ${text}` : ''
     const message =
       res.status === 401 || res.status === 403
         ? 'Неверный idInstance или apiTokenInstance'
-        : `Ошибка GREEN-API (${res.status})${text ? `: ${text}` : ''}`
+        : res.status === 404
+          ? 'Инстанс не найден — проверьте idInstance и apiUrl'
+          : res.status === 429
+            ? 'Слишком много запросов к GREEN-API, подождите немного'
+            : `Ошибка GREEN-API (${res.status})${details}`
     throw new GreenApiError(message, res.status)
   }
   const text = await res.text()

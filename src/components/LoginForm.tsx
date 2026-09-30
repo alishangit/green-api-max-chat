@@ -35,6 +35,14 @@ export function LoginForm({ onLogin }: { onLogin: (creds: Credentials) => void }
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    if (!/^\d+$/.test(form.idInstance.trim())) {
+      setError('idInstance — это число со страницы инстанса, например 7107000000')
+      return
+    }
+    if (/\s/.test(form.apiTokenInstance.trim()) || form.apiTokenInstance.includes('://')) {
+      setError('apiTokenInstance — длинная строка из букв и цифр со страницы инстанса')
+      return
+    }
     const apiUrl = normalizeApiUrl(form.apiUrl)
     if (!apiUrl) {
       setError('Некорректный apiUrl. Скопируйте его со страницы инстанса, например https://7107.api.greenapi.com')
@@ -70,7 +78,7 @@ export function LoginForm({ onLogin }: { onLogin: (creds: Credentials) => void }
 
         <label>
           idInstance
-          <input value={form.idInstance} onChange={set('idInstance')} placeholder="3100000000" inputMode="numeric" required autoFocus />
+          <input value={form.idInstance} onChange={set('idInstance')} placeholder="7107000000" inputMode="numeric" required autoFocus />
         </label>
         <label>
           apiTokenInstance
