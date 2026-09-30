@@ -5,6 +5,18 @@ import type { Credentials } from '../types'
 
 const DEFAULT_API_URL = 'https://api.green-api.com'
 
+/** Берёт последний http(s)-адрес из строки — на случай, если адрес вставили поверх другого */
+function normalizeApiUrl(value: string): string | null {
+  const matches = value.trim().match(/https?:\/\/[^\s]+?(?=https?:\/\/|\s|$)/g)
+  const url = matches?.[matches.length - 1]
+  if (!url) return value.trim() ? null : DEFAULT_API_URL
+  try {
+    return new URL(url).origin
+  } catch {
+    return null
+  }
+}
+
 const STATE_HINTS: Record<string, string> = {
   notAuthorized: 'инстанс не авторизован — отсканируйте QR-код в личном кабинете GREEN-API',
   blocked: 'аккаунт заблокирован',
@@ -13,7 +25,7 @@ const STATE_HINTS: Record<string, string> = {
 }
 
 export function LoginForm({ onLogin }: { onLogin: (creds: Credentials) => void }) {
-  const [form, setForm] = useState<Credentials>({ apiUrl: DEFAULT_API_URL, idInstance: '', apiTokenInstance: '' })
+  const [form, setForm] = useState<Credentials>({ apiUrl: '', idInstance: '', apiTokenInstance: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,9 +35,15 @@ export function LoginForm({ onLogin }: { onLogin: (creds: Credentials) => void }
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    const apiUrl = normalizeApiUrl(form.apiUrl)
+    if (!apiUrl) {
+      setError('Некорректный apiUrl. Скопируйте его со страницы инстанса, например https://7107.api.greenapi.com')
+      return
+    }
+    setForm((f) => ({ ...f, apiUrl }))
     setLoading(true)
     const creds = {
-      apiUrl: form.apiUrl.trim() || DEFAULT_API_URL,
+      apiUrl,
       idInstance: form.idInstance.trim(),
       apiTokenInstance: form.apiTokenInstance.trim(),
     }
@@ -60,7 +78,7 @@ export function LoginForm({ onLogin }: { onLogin: (creds: Credentials) => void }
         </label>
         <label>
           apiUrl
-          <input value={form.apiUrl} onChange={set('apiUrl')} placeholder={DEFAULT_API_URL} />
+          <input value={form.apiUrl} onChange={set('apiUrl')} placeholder="https://7107.api.greenapi.com" type="url" inputMode="url" />
         </label>
 
         {error && <div className="error">{error}</div>}
