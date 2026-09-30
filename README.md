@@ -4,6 +4,8 @@
 
 > **Про мессенджер.** В личном кабинете GREEN-API тариф для MAX недоступен (есть только WhatsApp и Telegram), поэтому, как разрешает задание, работа проверена на инстансе **WhatsApp**. Методы `sendMessage`, `receiveNotification` и `deleteNotification` у GREEN-API одинаковые для MAX и WhatsApp, так что приложение работает с обоими: достаточно указать данные нужного инстанса.
 
+**Демо:** https://green-api-max-chat-sable.vercel.app
+
 ## Возможности
 
 - Вход по учётным данным GREEN-API (`idInstance`, `apiTokenInstance`, при необходимости `apiUrl`). Данные проверяются методом `getStateInstance`: войти можно только в авторизованный инстанс.
